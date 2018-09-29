@@ -39,6 +39,8 @@ staticfiles
 *.mf4
 *.GPF
 *.gpf
+export/*
+
 
 # Venv
 venv/
