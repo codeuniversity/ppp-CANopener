@@ -35,7 +35,9 @@ staticfiles
 .env
 
 # Confidential files
+*.MF4
 *.mf4
+*.GPF
 *.gpf
 
 # Venv
