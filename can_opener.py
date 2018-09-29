@@ -3,11 +3,12 @@ import asammdf
 
 
 # scans the import directory for compatible files
-def filescan():
+def filescan(verbose=False):
     compatible_files = 0
     for file in os.listdir('import'):
         if file[-4:] == ".mf4":
-            print("compatible file found: " + file)
+            if verbose:
+                print("compatible file found: " + file)
             compatible_files += 1
 
     print("Total of", compatible_files, "compatible files found!")
