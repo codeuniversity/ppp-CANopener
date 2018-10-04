@@ -1,6 +1,7 @@
 import os
 import asammdf
 import json
+import numpy
 
 
 # scans the import directory for compatible files
@@ -33,6 +34,10 @@ def save_info_of_all_files():
     perform_function_on_all_files(open_and_write_info_to_file)
 
 
+def save_all_channel_names_of_all_files():
+    perform_function_on_all_files(write_channel_names_to_file)
+
+
 def perform_function_on_all_files(func):
     for _, _, files in os.walk('import'):
         for file in files:
@@ -55,6 +60,42 @@ def open_and_write_info_to_file(filename):
     export.write(json.dumps(info))
     export.close()
     mf4.close()
+
+
+def write_channel_names_to_file(filename):
+    mf4 = asammdf.mdf_v4.MDF4(build_local_path(filename))
+    export = open(('export/channels_' + filename + ".txt"), 'w+')
+    for group in mf4.groups:
+        for channel in group["channels"]:
+            if channel.name is "t":
+                continue
+
+            export.write(channel.name + "\n")
+    export.close()
+    mf4.close()
+
+def write_only_used_channel_names_to_file(filename, verbose=False):
+    mf4 = asammdf.mdf_v4.MDF4(build_local_path(filename))
+    export = open(('export/channels_' + filename + ".txt"), 'w+')
+    for group in mf4.groups:
+        for channel in group["channels"]:
+            if channel.name is "t":
+                continue
+            full_channel = mf4.get(channel.name)
+            if len(numpy.unique(full_channel.samples)) > 1:
+
+                export.write('Name: "' + full_channel.name + '"\n')
+                export.write('Description: "' + full_channel.comment + '"\n')
+                export.write('Min: ')
+                export.write(str(min(full_channel.samples)))
+                export.write(" Max: ")
+                export.write(str(max(full_channel.samples)))
+                export.write("\n\n\n")
+
+
+    export.close()
+    mf4.close()
+
 
 
 def build_local_path(filename):
