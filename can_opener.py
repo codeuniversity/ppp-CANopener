@@ -18,10 +18,10 @@ def filescan(verbose=False):
 
 
 def valid_filename(filename):
-    # filename needs to be at least 5 characters long, as the extention is .mf4
+    # filename needs to be at least 5 characters long, as the extention is .mf4, .mf3 or .mdf
     if len(filename) < 4:
         return False
-    elif filename[-4:].lower() == ".mf4":
+    elif filename[-4:].lower() == ".mdf" or (filename[-4:].lower() == ".mf3" or filename[-4:].lower() == ".mf4"):
         return True
     return False
 
@@ -47,41 +47,42 @@ def perform_function_on_all_files(func):
 
 
 def open_and_print_info(filename):
-    mf4 = asammdf.mdf_v4.MDF4(build_local_path(filename))
-    info = mf4.info()
+    mdf = asammdf.mdf.MDF(build_local_path(filename))
+    info = mdf.info()
     print(info)
-    mf4.close()
+    mdf.close()
 
 
 def open_and_write_info_to_file(filename):
-    mf4 = asammdf.mdf_v4.MDF4(build_local_path(filename))
+    mdf = asammdf.mdf.MDF(build_local_path(filename))
     export = open(('export/info_' + filename + ".json"), 'w+')
-    info = mf4.info()
+    info = mdf.info()
     export.write(json.dumps(info))
     export.close()
-    mf4.close()
+    mdf.close()
 
 
 def write_channel_names_to_file(filename):
-    mf4 = asammdf.mdf_v4.MDF4(build_local_path(filename))
+    mdf = asammdf.mdf.MDF(build_local_path(filename))
     export = open(('export/channels_' + filename + ".txt"), 'w+')
-    for group in mf4.groups:
+    for group in mdf.groups:
         for channel in group["channels"]:
             if channel.name is "t":
                 continue
 
             export.write(channel.name + "\n")
     export.close()
-    mf4.close()
+    mdf.close()
+
 
 def write_only_used_channel_names_to_file(filename, verbose=False):
-    mf4 = asammdf.mdf_v4.MDF4(build_local_path(filename))
+    mdf = asammdf.mdf.MDF(build_local_path(filename))
     export = open(('export/channels_' + filename + ".txt"), 'w+')
-    for group in mf4.groups:
+    for group in mdf.groups:
         for channel in group["channels"]:
             if channel.name is "t":
                 continue
-            full_channel = mf4.get(channel.name)
+            full_channel = mdf.get(channel.name)
             if len(numpy.unique(full_channel.samples)) > 1:
 
                 export.write('Name: "' + full_channel.name + '"\n')
@@ -92,10 +93,8 @@ def write_only_used_channel_names_to_file(filename, verbose=False):
                 export.write(str(max(full_channel.samples)))
                 export.write("\n\n\n")
 
-
     export.close()
-    mf4.close()
-
+    mdf.close()
 
 
 def build_local_path(filename):
